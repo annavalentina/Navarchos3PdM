@@ -26,8 +26,8 @@ public class KafkaConsumerNavarchos {
     String url = "jdbc:postgresql://";
     String user = "user";
     String password = "password";
-    int correlationWindow = 100;
-    static int correlationStep = 50;
+    int correlationWindow = 300;
+    static int correlationStep = 100;
 
     /**
      * Computes and saves to the database the correlation for a given device ID at a specific timestamp.
@@ -115,10 +115,8 @@ public class KafkaConsumerNavarchos {
         if (x.size() != y.size()) {
             throw new IllegalArgumentException("Input lists must have the same size");
         }
-
         int n = x.size();
         double sumX = 0, sumY = 0, sumXY = 0, sumXX = 0, sumYY = 0;
-
         for (int i = 0; i < n; i++) {
             double xi = x.get(i);
             double yi = y.get(i);
@@ -129,10 +127,8 @@ public class KafkaConsumerNavarchos {
             sumXX += xi * xi;   // sum of square of array X elements
             sumYY += yi * yi;   // sum of square of array Y elements
         }
-
         double numerator = n * sumXY - sumX * sumY;
         double denominator = Math.sqrt((n * sumXX - sumX * sumX) * (n * sumYY - sumY * sumY));
-
         // Handle division by zero (if denominator is very close to zero)
         if (Math.abs(denominator) < 1e-10) {
             return 0; // No correlation
@@ -462,7 +458,8 @@ public class KafkaConsumerNavarchos {
                             Integer coolantTemp = getIntOrNull(json, "coolantTemp");
                             Double MAFairFlowRate = getDoubleOrNull(json, "MAFairFlowRate");
                             if (rpm != null && obdSpeed != null && mapIntake != null && intakeTemp != null && coolantTemp != null && MAFairFlowRate != null) {
-                                if (obdSpeed > 20 && mapIntake > 95 && intakeTemp > 1 && intakeTemp < 210 && coolantTemp > 1 && coolantTemp < 210 && rpm > 1 && MAFairFlowRate > 1) {
+                                if (obdSpeed > 20 && mapIntake > 95 && intakeTemp > 1 && intakeTemp < 210 && coolantTemp > 1
+                                        && coolantTemp < 210 && rpm > 1 && MAFairFlowRate > 1) {
                                     // All conditions are met
                                     preparedStmt = conn.prepareStatement(buffer_query);
                                     preparedStmt.setInt(1, dateToUnixTimpestamp(eventJson.getString("deviceTime")));
